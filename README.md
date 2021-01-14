@@ -16,5 +16,5 @@ Project 2 for Group 1 (Cameron, Carrel, Chris, Tristan). Spark storage and manip
 - Produce a simple set of slides that displays our findings in the analyses
 - Any additional mentions in the respective [project requirements page](https://github.com/revature-scalawags/notes/blob/main/Project%202.md)
 
-## Project setup and execution
+## Project Setup and Execution
 - TBD
