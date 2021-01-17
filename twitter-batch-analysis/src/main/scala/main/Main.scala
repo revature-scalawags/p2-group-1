@@ -17,10 +17,6 @@ object Main {
   // Driver
   def main(args: Array[String]): Unit = {
 
-    // These keys are simply here for ease of use (copy/paste them into bash environment).  They will be removed
-    // export AWS_ACCESS_KEY_ID=AKIAZK752DIR3DK2PYCN
-    // export AWS_SECRET_ACCESS_KEY=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
-
     val key = System.getenv("AWS_ACCESS_KEY_ID")
     val secret = System.getenv("AWS_SECRET_ACCESS_KEY")
     val client = S3Client.buildS3Client(key, secret)      // Build the S3 client with access keys
