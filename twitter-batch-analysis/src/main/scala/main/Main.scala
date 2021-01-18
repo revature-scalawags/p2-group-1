@@ -31,9 +31,9 @@ object Main {
     jsonFile.printSchema()
 
     // Converts the json data into Tweet objects and prints them to console; may be moved to a separate method later
-    //import spark.implicits._
-    //val userSet = jsonFile.as[Tweet]
-    //userSet.show()                      // TODO: Data should be processed here in some way, rather than simply printed
+    import spark.implicits._
+    val userSet = jsonFile.as[Tweet]
+    userSet.show()                      // TODO: Data should be processed here in some way, rather than simply printed
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket
 
