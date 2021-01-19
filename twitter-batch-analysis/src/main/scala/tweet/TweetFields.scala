@@ -1,8 +1,9 @@
 package tweet
 
 // Cases classes used to convert json to Scala objects
-case class Tweet(data: Array[Data])
-case class Data(id: String, text: String)
+case class Tweets(data: Array[Tweet], meta: Meta)
+case class Tweet(id: String, text: String)
+case class Meta(newest_id: String, oldest_id: String, result_count: Long, next_token: String)
 
 
 
