@@ -35,7 +35,7 @@ object Main {
     import spark.implicits._
     val tweetSet = jsonFile.as[Tweets]
     val flattened = tweetSet.select(explode($"data"))
-    flattened.select("col.id","col.text").show(false)                      // TODO: Data should be processed here in some way, rather than simply printed. Also this output is ugly
+    flattened.select("col.id","col.text").show(false)           // TODO: Data should be processed here in some way, rather than simply printed. Also, this output is ugly af
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket
 
