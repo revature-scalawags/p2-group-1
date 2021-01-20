@@ -2,8 +2,9 @@ package main
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.functions.explode
 
-import tweet.Tweet
+import tweet.Tweets
 import util.S3Client
 
 
@@ -27,13 +28,14 @@ object Main {
     sc.setLogLevel("WARN")
 
     // Reads in temp json data from S3 bucket and prints the schema; may be moved to separate method later
-    val jsonFile = spark.read.option("multiline", "true").json("s3a://cjohn281-twit-lake/batch/TEST.json").cache()
+    val jsonFile = spark.read.option("multiline", "false").json("s3a://cjohn281-twit-lake/batch/data.json").cache()
     jsonFile.printSchema()
 
     // Converts the json data into Tweet objects and prints them to console; may be moved to a separate method later
     import spark.implicits._
-    val userSet = jsonFile.as[Tweet]
-    userSet.show()                      // TODO: Data should be processed here in some way, rather than simply printed
+    val tweetSet = jsonFile.as[Tweets]
+    val flattened = tweetSet.select(explode($"data"))
+    flattened.select("col.id","col.text").show(false)           // TODO: Data should be processed here in some way, rather than simply printed. Also, this output is ugly af
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket
 
