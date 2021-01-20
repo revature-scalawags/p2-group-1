@@ -4,12 +4,13 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
+import com.typesafe.scalalogging.LazyLogging
 
 
 /**
   * Singleton object that provides static methods for working with AWS S3
   */
-object S3Client {
+object S3Client extends LazyLogging{
 
 
   /**

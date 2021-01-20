@@ -255,3 +255,4 @@ fabric.properties
 .idea/codestream.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/scala,visualstudiocode,metals,bloop,sbt,apachehadoop,spark, intellij
+twitter-batch-get/.scalafmt.conf
