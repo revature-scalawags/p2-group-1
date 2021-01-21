@@ -46,9 +46,13 @@ object Get extends LazyLogging {
 
     // Build URI and set headers
     logger.info("Building URI and setting headers.")
+    // val uriBuilder = new URIBuilder(
+    //   "https://api.twitter.com/2/tweets/search/recent?query=@SatisfactoryAF&max_results=100&tweet.fields=lang"
+    // ) // Replace this after determining project goals
     val uriBuilder = new URIBuilder(
       "https://api.twitter.com/2/tweets/search/recent?query=insurrection&max_results=10"
     ) // Replace this after determining project goals
+
     val httpGet = new HttpGet(uriBuilder.build)
     httpGet.setHeader("Authorization", s"Bearer ${twitBearerToken}")
     logger.info("Headers set.")
