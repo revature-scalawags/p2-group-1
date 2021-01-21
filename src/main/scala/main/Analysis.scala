@@ -35,17 +35,17 @@ object Analysis {
     import spark.implicits._
     val tweetSet = jsonFile.as[Tweets]
     val flattened = tweetSet.select(explode($"data"))
-    val textString = flattened.select("col.text").collect.map(_.toSeq).flatten.mkString("~").filter(_ >= ' ')          
+    val textArray = flattened.select("col.text").collect.map(_.toSeq).flatten.map(str => str.toString().filter(_ >= ' '))         
     
     // TODO: Data should be processed here in some way
 
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket
     client.putObject(
-        "cjohn281-twit-warehouse/batch",
-        "data.txt", // Or whatever you want to call it
-        textString // Replace this with processed collection of data
-      )
+      "cjohn281-twit-warehouse/batch",
+      "data.txt", // Or whatever you want to call it
+      textArray.mkString("~") // Replace this with processed collection of data
+    )
 
     sc.stop()
   }
