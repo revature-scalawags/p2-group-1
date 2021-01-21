@@ -6,6 +6,7 @@ import org.apache.spark.sql.functions.explode
 
 import tweet.Tweets
 import util.S3Client
+import util.KeyPhraseExtractor
 
 
 /**
@@ -37,7 +38,11 @@ object Analysis {
     val flattened = tweetSet.select(explode($"data"))
     val textArray = flattened.select("col.text").collect.map(_.toSeq).flatten.map(str => str.toString().filter(_ >= ' '))         
     
-    // TODO: Data should be processed here in some way
+    val keyWordList: Array[String] = Array.empty[String]
+    
+    keyWordList :+ textArray.foreach(KeyPhraseExtractor.extractPhrases(_))
+
+    keyWordList.foreach(println(_))
 
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket

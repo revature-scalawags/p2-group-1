@@ -12,11 +12,16 @@ object KeyPhraseExtractor extends LazyLogging{
 	val client = authenticateClient(key,endpoint)
 
 	def authenticateClient (key: String, endpoint: String): TextAnalyticsClient = {
+		logger.info(s"authenticating client on $endpoint with analytics token $key")
 		return new TextAnalyticsClientBuilder().credential(new AzureKeyCredential(key)).endpoint(endpoint).buildClient()
 	}
 
-	def extractPhrases(inputText: String) {
+	def extractPhrases(inputText: String): Array[String] = {
+		logger.info(s"extracting key phrases from string: $inputText")
+		var wordList = Array.empty[String]
 		val keyWords = client.extractKeyPhrases(inputText)
-		
+		keyWords.forEach(wordList:+_)
+		logger.info(s"returning list of keywords: $wordList")
+		return wordList
 	}
 }
