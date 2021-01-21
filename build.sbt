@@ -4,6 +4,7 @@ name := "project-2"
 version := "1.0"
 organization := "com.revature"
 
+libraryDependencies += "com.azure" % "azure-ai-textanalytics" % "5.0.0"
 libraryDependencies += "com.github.seratch" %% "awscala-s3" % "0.8.+"
 libraryDependencies += "org.apache.hadoop" % "hadoop-aws" % "2.8.3"
 libraryDependencies += "org.apache.httpcomponents" % "httpclient" % "4.5.12"
