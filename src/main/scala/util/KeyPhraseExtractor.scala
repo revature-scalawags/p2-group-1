@@ -20,7 +20,7 @@ object KeyPhraseExtractor extends LazyLogging{
 		logger.info(s"extracting key phrases from string: $inputText")
 		var wordList = Array.empty[String]
 		val keyWords = client.extractKeyPhrases(inputText)
-		keyWords.forEach(wordList:+_)
+		keyWords.forEach(str => wordList = wordList :+ str)
 		logger.info(s"returning list of keywords: $wordList")
 		return wordList
 	}

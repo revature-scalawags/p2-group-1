@@ -38,9 +38,11 @@ object Analysis {
     val flattened = tweetSet.select(explode($"data"))
     val textArray = flattened.select("col.text").collect.map(_.toSeq).flatten.map(str => str.toString().filter(_ >= ' '))         
     
-    val keyWordList: Array[String] = Array.empty[String]
-    
-    keyWordList :+ textArray.foreach(KeyPhraseExtractor.extractPhrases(_))
+    var keyWordList: Array[String] = Array.empty[String]
+
+    for (i <- 0 until textArray.length) {
+      keyWordList = keyWordList ++ KeyPhraseExtractor.extractPhrases(textArray(i))
+    }
 
     keyWordList.foreach(println(_))
 
