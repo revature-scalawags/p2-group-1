@@ -13,7 +13,7 @@ import com.typesafe.scalalogging.LazyLogging
 /** twitter-batch-get is the program that is intended to gather histroical data from the Twitter API
   * and store it on the S3 bucket s3://cjohn281-twit-lake/batch/data.json
   */
-object Main extends LazyLogging {
+object Get extends LazyLogging {
   def main(args: Array[String]): Unit = {
     // Twitter key
     logger.info("Start of new execution.")
@@ -47,7 +47,7 @@ object Main extends LazyLogging {
     // Build URI and set headers
     logger.info("Building URI and setting headers.")
     val uriBuilder = new URIBuilder(
-      "https://api.twitter.com/2/tweets/search/recent?query=insurrection&max_results=10"
+      "https://api.twitter.com/2/tweets/search/recent?query=insurrection&max_results=100"
     ) // Replace this after determining project goals
     val httpGet = new HttpGet(uriBuilder.build)
     httpGet.setHeader("Authorization", s"Bearer ${twitBearerToken}")
