@@ -35,9 +35,17 @@ object Analysis {
     import spark.implicits._
     val tweetSet = jsonFile.as[Tweets]
     val flattened = tweetSet.select(explode($"data"))
-    flattened.select("col.id","col.text").show(false)           // TODO: Data should be processed here in some way, rather than simply printed. Also, this output is ugly af
+    val textString = flattened.select("col.text").collect.map(_.toSeq).flatten.mkString("~").filter(_ >= ' ')          
+    
+    // TODO: Data should be processed here in some way
+
 
     // TODO: push processed data to S3 /warehouse/batch/ bucket
+    client.putObject(
+        "cjohn281-twit-warehouse/batch",
+        "data.txt", // Or whatever you want to call it
+        textString // Replace this with processed collection of data
+      )
 
     sc.stop()
   }
