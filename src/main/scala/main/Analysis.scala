@@ -13,7 +13,7 @@ import util.S3Client
   * s3://cjohn281-twit-lake/batch/data.json, process it in some way, and store the processed
   * data on s3://cjohn281-twit-warehouse/batch/data.json
   */
-object Main {
+object Analysis {
 
   // Driver
   def main(args: Array[String]): Unit = {
