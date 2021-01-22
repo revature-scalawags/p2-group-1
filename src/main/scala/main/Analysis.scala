@@ -66,27 +66,30 @@ object Analysis {
 
     val countQuery: DataFrame = spark.sql(
       "SELECT keywords, count(keywords) as count FROM keywords WHERE (keywords != \"rt\") GROUP BY keywords ORDER BY count DESC"
-    )
+    ).cache()
 
-    countQuery.show(false)
+    // show 100 untruncated rows
+    countQuery.show(100, false)
 
-    val test = countQuery.collect()
-    val test2 = test.map(row => row.toSeq).flatten
+    // convert dataframe to Array
+    val records = countQuery
+      .collect()
+      .map(row => row.toSeq)
+      .flatten
 
+    // Build output string to be sent to S3 bucket as .csv
     var outputStr = "keywords,count\n"
-    
-    for (i <- 0 until test2.length) {
-      if (i % 2 == 0) outputStr += test2(i).toString() + ","
-      else outputStr += test2(i).toString() + "\n"
+    for (i <- 0 until records.length) {
+      if (i % 2 == 0) outputStr += records(i).toString() + ","
+      else outputStr += records(i).toString() + "\n"
     }
 
+    // Push output string to S3 bucket as .csv
     client.putObject(
       "cjohn281-twit-warehouse/batch",
       "analysis.csv",
       outputStr
     )
-
-    // println(outputStr)
 
     sc.stop()
   }
