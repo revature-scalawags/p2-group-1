@@ -92,5 +92,6 @@ object Analysis {
     )
 
     sc.stop()
+    println("Analysis data saved to analysis.csv")
   }
 }

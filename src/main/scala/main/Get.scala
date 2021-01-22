@@ -75,5 +75,6 @@ object Get extends LazyLogging {
       )
     }
     logger.info("HTTP client response completed. Execution complete.")
+    println("Twitter data successfully gathered an stored")
   }
 }
