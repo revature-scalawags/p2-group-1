@@ -50,7 +50,7 @@ object Get extends LazyLogging {
     //   "https://api.twitter.com/2/tweets/search/recent?query=@SatisfactoryAF&max_results=100&tweet.fields=lang"
     // ) // Replace this after determining project goals
     val uriBuilder = new URIBuilder(
-      "https://api.twitter.com/2/tweets/search/recent?query=inauguration&max_results=100"
+      "https://api.twitter.com/2/tweets/search/recent?query=inauguration&max_results=100&start_time=2021-01-20T05:00:00Z"
     ) // Replace this after determining project goals
 
     val httpGet = new HttpGet(uriBuilder.build)
@@ -66,12 +66,12 @@ object Get extends LazyLogging {
       val responseString = EntityUtils.toString(
         entity,
         "UTF-8"
-      ) // Replace this after determining project goals
+      )
       client.putObject(
         "cjohn281-twit-lake/batch",
         "data.json",
         responseString
-      ) // Replace this after determining project goals
+      )
     }
     logger.info("HTTP client response completed. Execution complete.")
   }
