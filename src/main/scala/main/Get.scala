@@ -46,12 +46,9 @@ object Get extends LazyLogging {
 
     // Build URI and set headers
     logger.info("Building URI and setting headers.")
-    // val uriBuilder = new URIBuilder(
-    //   "https://api.twitter.com/2/tweets/search/recent?query=@SatisfactoryAF&max_results=100&tweet.fields=lang"
-    // ) // Replace this after determining project goals
     val uriBuilder = new URIBuilder(
-      "https://api.twitter.com/2/tweets/search/recent?query=insurrection&max_results=10"
-    ) // Replace this after determining project goals
+      "https://api.twitter.com/2/tweets/search/recent?query=inauguration&max_results=100&start_time=2021-01-20T05:00:00Z"
+    )
 
     val httpGet = new HttpGet(uriBuilder.build)
     httpGet.setHeader("Authorization", s"Bearer ${twitBearerToken}")
@@ -66,12 +63,13 @@ object Get extends LazyLogging {
       val responseString = EntityUtils.toString(
         entity,
         "UTF-8"
-      ) // Replace this after determining project goals
+      )
+      // Write response to json file, store it on S3 bucket
       client.putObject(
         "cjohn281-twit-lake/batch",
         "data.json",
         responseString
-      ) // Replace this after determining project goals
+      )
     }
     logger.info("HTTP client response completed. Execution complete.")
   }
