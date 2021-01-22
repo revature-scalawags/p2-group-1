@@ -8,6 +8,7 @@ import org.apache.spark.sql.DataFrame
 import tweet.Tweets
 import util.S3Client
 import util.KeyPhraseExtractor
+import java.io.File
 
 /** twitter-batch-analysis is the program that is intended to retrieve raw Twitter data from
   * s3://cjohn281-twit-lake/batch/data.json, process it in some way, and store the processed
@@ -39,7 +40,6 @@ object Analysis {
       .option("multiline", "false")
       .json("s3a://cjohn281-twit-lake/batch/data.json")
       .cache()
-    jsonFile.printSchema()
 
     // Converts the json data into Tweet objects and prints them to console; may be moved to a separate method later
     import spark.implicits._
@@ -56,30 +56,37 @@ object Analysis {
 
     for (i <- 0 until textArray.length) {
       keyWordList =
-        keyWordList ++ KeyPhraseExtractor.extractPhrases(textArray(i))
+        keyWordList ++ KeyPhraseExtractor.extractPhrases(textArray(i).toLowerCase())
     }
 
+    // keyWordList.foreach(println)
     val kwldf = keyWordList.toSeq.toDF("keywords")
 
     kwldf.createOrReplaceTempView("keywords")
 
     val countQuery: DataFrame = spark.sql(
-      "SELECT keywords, count(keywords) as count FROM keywords WHERE (keywords != \"RT\") GROUP BY keywords ORDER BY count DESC"
+      "SELECT keywords, count(keywords) as count FROM keywords WHERE (keywords != \"rt\") GROUP BY keywords ORDER BY count DESC"
     )
 
-    countQuery.show()
+    countQuery.show(false)
 
-    countQuery.write
-      .format("csv")
-      .mode("overwrite")
-      .save("s3a://cjohn281-twit-warehouse/batch") //FIXME: this is what's breaking things but I have no clue how to fix it
+    val test = countQuery.collect()
+    val test2 = test.map(row => row.toSeq).flatten
 
-    // TODO: push processed data to S3 /warehouse/batch/ bucket
-    // client.putObject(
-    //   "cjohn281-twit-warehouse/batch",
-    //   "data.txt", // Or whatever you want to call it
-    //   textArray.mkString("~") // Replace this with processed collection of data
-    // )
+    var outputStr = "keywords,count\n"
+    
+    for (i <- 0 until test2.length) {
+      if (i % 2 == 0) outputStr += test2(i).toString() + ","
+      else outputStr += test2(i).toString() + "\n"
+    }
+
+    client.putObject(
+      "cjohn281-twit-warehouse/batch",
+      "analysis.csv",
+      outputStr
+    )
+
+    // println(outputStr)
 
     sc.stop()
   }
