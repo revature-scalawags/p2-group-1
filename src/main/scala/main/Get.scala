@@ -15,6 +15,9 @@ import com.typesafe.scalalogging.LazyLogging
   */
 object Get extends LazyLogging {
   def main(args: Array[String]): Unit = {
+
+    val keyword = args(0)
+
     // Twitter key
     logger.info("Start of new execution.")
 
@@ -47,7 +50,7 @@ object Get extends LazyLogging {
     // Build URI and set headers
     logger.info("Building URI and setting headers.")
     val uriBuilder = new URIBuilder(
-      "https://api.twitter.com/2/tweets/search/recent?query=inauguration&max_results=100&start_time=2021-01-20T05:00:00Z"
+      s"https://api.twitter.com/2/tweets/search/recent?query=${keyword}&max_results=100&start_time=2021-01-20T05:00:00Z"
     )
 
     val httpGet = new HttpGet(uriBuilder.build)
