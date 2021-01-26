@@ -15,6 +15,11 @@ import java.io._
 
 import scala.concurrent._
 
+/** This is the program that is intended to retrieve raw Twitter data from
+  * a twitter streaming client (from Twitter4s) and count the mentions of 'covid'
+  * per minute in the stream. Future functionality will allow for custom hashtag searching
+  * and mini-batch processing of the streaming data.
+  */
 object Stream extends LazyLogging {
   def main(args: Array[String]): Unit = {
 
@@ -29,15 +34,10 @@ object Stream extends LazyLogging {
 
     val runtime = 3 //minutes
     val runtimeMS = runtime * 60000 //stores runtime in milliseconds
-
     val streamingClient = TwitterStreamingClient()
-
     val trackedWords = Seq("#covid")
-
     var tweetCounter = 0
-
     val t0 = System.currentTimeMillis()
-
     val pw = new PrintWriter(new File("tweetText.txt"))
 
     streamingClient.filterStatuses(tracks = trackedWords) { case tweet: Tweet =>
@@ -47,7 +47,9 @@ object Stream extends LazyLogging {
       tweetCounter += 1
       if (System.currentTimeMillis() - t0 > runtimeMS) {
         val tweetsPerMinute = tweetCounter / runtime
-        println("Twitter Users are tweeting about Covid " + tweetsPerMinute + " per minute on average")
+        println(
+          "Twitter Users are tweeting about Covid " + tweetsPerMinute + " per minute on average"
+        )
         streamingClient.shutdown()
         pw.close
       }

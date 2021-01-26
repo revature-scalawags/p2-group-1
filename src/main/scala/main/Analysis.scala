@@ -41,7 +41,7 @@ object Analysis {
       .json("s3a://cjohn281-twit-lake/batch/data.json")
       .cache()
 
-    // Converts the json data into Tweet objects and prints them to console; may be moved to a separate method later
+    // Converts the json data into Tweet objects and flattens them into an array for keyword processing
     import spark.implicits._
     val tweetSet = jsonFile.as[Tweets]
     val flattened = tweetSet.select(explode($"data"))
@@ -52,21 +52,22 @@ object Analysis {
       .flatten
       .map(str => str.toString().filter(_ >= ' '))
 
+    //extract the keywords from the tweet texts and place them into a new array
     var keyWordList: Array[String] = Array.empty[String]
-
     for (i <- 0 until textArray.length) {
-      keyWordList =
-        keyWordList ++ KeyPhraseExtractor.extractPhrases(textArray(i).toLowerCase())
+      keyWordList = keyWordList ++ KeyPhraseExtractor.extractPhrases(
+        textArray(i).toLowerCase()
+      )
     }
-
-    // keyWordList.foreach(println)
     val kwldf = keyWordList.toSeq.toDF("keywords")
 
+    //Query the keyword array with an SQL statement to return the most common phrases
     kwldf.createOrReplaceTempView("keywords")
-
-    val countQuery: DataFrame = spark.sql(
-      "SELECT keywords, count(keywords) as count FROM keywords WHERE (keywords != \"rt\") GROUP BY keywords ORDER BY count DESC"
-    ).cache()
+    val countQuery: DataFrame = spark
+      .sql(
+        "SELECT keywords, count(keywords) as count FROM keywords WHERE (keywords != \"rt\") GROUP BY keywords ORDER BY count DESC"
+      )
+      .cache()
 
     // show 100 untruncated rows
     countQuery.show(100, false)
