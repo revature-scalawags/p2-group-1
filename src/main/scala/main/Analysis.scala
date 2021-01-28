@@ -93,6 +93,6 @@ object Analysis {
     )
 
     sc.stop()
-    println("Analysis data saved to analysis.csv")
+    println("Analysis data saved to analysis.csv on S3 bucket")
   }
 }

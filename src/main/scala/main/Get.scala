@@ -18,7 +18,6 @@ object Get extends LazyLogging {
 
     val keyword = args(0)
 
-    // Twitter key
     logger.info("Start of new execution.")
 
     // Twitter key
