@@ -3,11 +3,12 @@ package main
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions.explode
+import org.apache.spark.sql.functions.split
+import org.apache.spark.sql.functions.lower
 
 import tweet.Tweets
-// import util.S3Client
-// import util.KeyPhraseExtractor
 import java.io.File
+import scala.collection.mutable.ArrayBuffer
 
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.client.config.RequestConfig
@@ -15,6 +16,8 @@ import org.apache.http.client.config.CookieSpecs
 import org.apache.http.client.utils.URIBuilder
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
+
+//import org.apache.commons.lang3
 
 import com.typesafe.scalalogging.LazyLogging
 
@@ -45,7 +48,7 @@ object ComparisonAnalysis extends LazyLogging {
         // Build URI and set headers
         logger.info("Building URI and setting headers.")
         val uriBuilder = new URIBuilder(
-        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._1}&max_results=100&start_time=2021-01-22T05:00:00Z"
+        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._1}&max_results=10&start_time=2021-01-22T05:00:00Z"
         )
 
         val httpGet = new HttpGet(uriBuilder.build)
@@ -76,15 +79,52 @@ object ComparisonAnalysis extends LazyLogging {
             // Converts the json data into Tweet objects and flattens them into an array of words
             import spark.implicits._
             val tweetSet = spark.read.json(Seq(responseString).toDS).as[Tweets]
-            val flattened = tweetSet.select(explode($"data"))
-            val tweetArray = flattened
-                .select("col.text")
-                .collect
-                .map(_.toSeq)
-                .flatten
-                .map(str => str.toString().filter(_ >= ' '))
+            val tweetsFrame = tweetSet.select(explode($"data"))
+            val wordsFrame = tweetsFrame.select(explode(split($"col.text", " ")).as("words"))
+            val loweredFrame = wordsFrame.select(lower($"words").as("words"))//.filter(lang3.StringUtils.isAlpha(_.toSeq))
             
-            tweetArray.foreach(println)
+            loweredFrame.createOrReplaceTempView("words")
+            //filter @, numbers, commas and periods?????
+
+            val wordCounts: DataFrame = spark
+                .sql(
+                    "SELECT words, count(words) as count FROM words WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
+                )
+                .cache()
+
+            wordCounts.show
+            
+            
+
+
+
+
+
+
+
+            // val tweetArray = flattened
+            //     .select("col.text")
+            //     .collect
+            //     .map(_.toSeq)
+            //     .flatten
+            //     .map(str => str.toString().filter(_ >= ' '))
+
+            //tweetArray.foreach(println)
+            
+
+            /*
+            // Extract all the words from each tweet, creating a 2D matrix of tweets and their words
+            var tweetsWords = ArrayBuffer(Array.empty[String])
+            for (tweet <- tweetArray){
+                //tweet.toLowerCase().split(" ").foreach(println)
+                tweetsWords += tweet.toLowerCase().split(" ")//.filter(_ != "rt") also 
+            }
+            println("HERE!!!!!!!!!!")
+            println(tweetsWords)
+            tweetsWords.foreach(println)
+            */
+
+
         }
 
         sc.stop()
