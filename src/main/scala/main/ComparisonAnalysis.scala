@@ -48,10 +48,10 @@ object ComparisonAnalysis extends LazyLogging {
         // Build URI and set headers for each query
         logger.info("Building URI and setting headers.")
         val uriBuilder1 = new URIBuilder(
-        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._1}&max_results=10&start_time=2021-01-22T05:00:00Z"
+        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._1}&max_results=100&start_time=2021-01-25T05:00:00Z"
         )
         val uriBuilder2 = new URIBuilder(
-        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._2}&max_results=10&start_time=2021-01-22T05:00:00Z"
+        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._2}&max_results=100&start_time=2021-01-25T05:00:00Z"
         )
 
         val httpGet1 = new HttpGet(uriBuilder1.build)
@@ -97,9 +97,9 @@ object ComparisonAnalysis extends LazyLogging {
                 .sql(
                     "SELECT words, count(words) as count FROM words1 WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
                 )
-                .cache()
-
-            wordCounts1.show
+                .cache()    
+            wordCounts1.createOrReplaceTempView("words1Counts")
+            //wordCounts1.show
 
             val responseString2 = EntityUtils.toString(entity2)
             val tweetSet2 = spark.read.json(Seq(responseString2).toDS).as[Tweets]
@@ -112,41 +112,37 @@ object ComparisonAnalysis extends LazyLogging {
                 .sql(
                     "SELECT words, count(words) as count FROM words2 WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
                 )
-                .cache()
+                .cache()  
+            wordCounts2.createOrReplaceTempView("words2Counts")
+            //wordCounts2.show
 
-            wordCounts2.show
-            
-            
-
-
-
-
-
-
-
-            // val tweetArray = flattened
-            //     .select("col.text")
-            //     .collect
-            //     .map(_.toSeq)
-            //     .flatten
-            //     .map(str => str.toString().filter(_ >= ' '))
-
-            //tweetArray.foreach(println)
-            
+            val wordsCombined: DataFrame = spark
+                .sql(
+                    """
+                    SELECT words1Counts.words, words1Counts.count AS count1, words2Counts.count AS count2
+                    FROM words1Counts
+                    JOIN words2Counts
+                    ON words1Counts.words = words2Counts.words
+                    ORDER BY words1Counts.count DESC
+                    """
+                )
+            wordsCombined.show
 
             /*
-            // Extract all the words from each tweet, creating a 2D matrix of tweets and their words
-            var tweetsWords = ArrayBuffer(Array.empty[String])
-            for (tweet <- tweetArray){
-                //tweet.toLowerCase().split(" ").foreach(println)
-                tweetsWords += tweet.toLowerCase().split(" ")//.filter(_ != "rt") also 
-            }
-            println("HERE!!!!!!!!!!")
-            println(tweetsWords)
-            tweetsWords.foreach(println)
+            //COMBINE SELECT STATEMENTS INTO ONE WITH A JOIN -- didn't work
+            val wordCountsCombined: DataFrame = spark
+                .sql(
+                    """SELECT words1.words, count(words1.words) as words1Count, count(words2.words) as words2Count 
+                    FROM words1
+                    JOIN words2
+                    ON words1.words = words2.words
+                    WHERE words1.words != "rt"
+                    GROUP BY words1.words
+                    ORDER BY words1Count DESC"""
+                )
+
+            wordCountsCombined.show
             */
-
-
         }
 
         sc.stop()
