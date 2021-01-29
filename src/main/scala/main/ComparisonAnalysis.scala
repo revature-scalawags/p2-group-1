@@ -45,20 +45,28 @@ object ComparisonAnalysis extends LazyLogging {
         .build
         logger.info("HTTP client build complete.")
 
-        // Build URI and set headers
+        // Build URI and set headers for each query
         logger.info("Building URI and setting headers.")
-        val uriBuilder = new URIBuilder(
+        val uriBuilder1 = new URIBuilder(
         s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._1}&max_results=10&start_time=2021-01-22T05:00:00Z"
         )
+        val uriBuilder2 = new URIBuilder(
+        s"https://api.twitter.com/2/tweets/search/recent?query=${keywords._2}&max_results=10&start_time=2021-01-22T05:00:00Z"
+        )
 
-        val httpGet = new HttpGet(uriBuilder.build)
-        httpGet.setHeader("Authorization", s"Bearer ${twitBearerToken}")
+        val httpGet1 = new HttpGet(uriBuilder1.build)
+        httpGet1.setHeader("Authorization", s"Bearer ${twitBearerToken}")
+        logger.info("Headers set.")
+        val httpGet2 = new HttpGet(uriBuilder2.build)
+        httpGet2.setHeader("Authorization", s"Bearer ${twitBearerToken}")
         logger.info("Headers set.")
 
-        // Get response
+        // Get response from each query
         logger.info("Attempting response from the HTTP client.")
-        val response = httpClient.execute(httpGet)
-        val entity = response.getEntity()
+        val response1 = httpClient.execute(httpGet1)
+        val entity1 = response1.getEntity()
+        val response2 = httpClient.execute(httpGet2)
+        val entity2 = response2.getEntity()
 
         // Build SparkSession and Context
         val spark = SparkSession
@@ -68,31 +76,45 @@ object ComparisonAnalysis extends LazyLogging {
             .getOrCreate()
         val sc = spark.sparkContext
         sc.setLogLevel("WARN")
-
-
         
-        if (entity != null) {
+        if (entity1 != null && entity2 != null) {
             // Convert response to string
-            val responseString = EntityUtils.toString(entity)
+            val responseString1 = EntityUtils.toString(entity1)
             //println(responseString)
 
-            // Converts the json data into Tweet objects and flattens them into an array of words
+            // Converts the json data into Tweet objects and flattens them into a dataframe of lowercase words
             import spark.implicits._
-            val tweetSet = spark.read.json(Seq(responseString).toDS).as[Tweets]
-            val tweetsFrame = tweetSet.select(explode($"data"))
-            val wordsFrame = tweetsFrame.select(explode(split($"col.text", " ")).as("words"))
-            val loweredFrame = wordsFrame.select(lower($"words").as("words"))//.filter(lang3.StringUtils.isAlpha(_.toSeq))
+            val tweetSet1 = spark.read.json(Seq(responseString1).toDS).as[Tweets]
+            val tweetsFrame1 = tweetSet1.select(explode($"data"))
+            val wordsFrame1 = tweetsFrame1.select(explode(split($"col.text", " ")).as("words"))
+            val loweredFrame1 = wordsFrame1.select(lower($"words").as("words"))//.filter(lang3.StringUtils.isAlpha(_.toSeq))
             
-            loweredFrame.createOrReplaceTempView("words")
+            loweredFrame1.createOrReplaceTempView("words1")
+            
+            // Creates a dataframe of each unique word and its count
             //filter @, numbers, commas and periods?????
-
-            val wordCounts: DataFrame = spark
+            val wordCounts1: DataFrame = spark
                 .sql(
-                    "SELECT words, count(words) as count FROM words WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
+                    "SELECT words, count(words) as count FROM words1 WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
                 )
                 .cache()
 
-            wordCounts.show
+            wordCounts1.show
+
+            val responseString2 = EntityUtils.toString(entity2)
+            val tweetSet2 = spark.read.json(Seq(responseString2).toDS).as[Tweets]
+            val tweetsFrame2 = tweetSet2.select(explode($"data"))
+            val wordsFrame2 = tweetsFrame2.select(explode(split($"col.text", " ")).as("words"))
+            val loweredFrame2 = wordsFrame2.select(lower($"words").as("words"))//.filter(lang3.StringUtils.isAlpha(_.toSeq))
+            
+            loweredFrame2.createOrReplaceTempView("words2")
+            val wordCounts2: DataFrame = spark
+                .sql(
+                    "SELECT words, count(words) as count FROM words2 WHERE (words != \"rt\") GROUP BY words ORDER BY count DESC"
+                )
+                .cache()
+
+            wordCounts2.show
             
             
 
