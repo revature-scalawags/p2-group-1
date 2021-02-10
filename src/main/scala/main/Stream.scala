@@ -40,8 +40,7 @@ object Stream extends LazyLogging {
     val t0 = System.currentTimeMillis()
     val pw = new PrintWriter(new File("tweetText.txt"))
 
-   
-    /** This function checks the stream for Tweet objects that contain the hashtag(E.G. #covid) that we are searching for. 
+    /** This function checks the stream for Tweet objects that contain the hashtag(E.G. #covid) that we are searching for.
       * Then performs several analysis functions on the Tweet object
       */
     streamingClient.filterStatuses(tracks = trackedWords) { case tweet: Tweet =>

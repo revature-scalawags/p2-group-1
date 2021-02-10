@@ -6,15 +6,11 @@ import com.amazonaws.services.s3.AmazonS3
 import com.amazonaws.services.s3.AmazonS3ClientBuilder
 import com.typesafe.scalalogging.LazyLogging
 
-
-/**
-  * Singleton object that provides static methods for working with AWS S3
+/** Singleton object that provides static methods for working with AWS S3
   */
-object S3Client extends LazyLogging{
+object S3Client extends LazyLogging {
 
-
-  /**
-    * Builds the AmazonS3 object with credentials for accessing data stored on the cloud
+  /** Builds the AmazonS3 object with credentials for accessing data stored on the cloud
     *
     * @param key S3 Access token
     * @param secret S3 Secret token
