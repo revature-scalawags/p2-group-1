@@ -50,7 +50,7 @@ object Get extends LazyLogging {
     // Build URI and set headers
     logger.info("Building URI and setting headers.")
     val uriBuilder = new URIBuilder(
-      s"https://api.twitter.com/2/tweets/search/recent?query=${keyword}&max_results=100&start_time=2021-01-20T05:00:00Z"
+      s"https://api.twitter.com/2/tweets/search/recent?query=${keyword}&max_results=100&start_time=2021-02-09T05:00:00Z"
     )
 
     val httpGet = new HttpGet(uriBuilder.build)

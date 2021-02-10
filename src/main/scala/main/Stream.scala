@@ -32,8 +32,8 @@ object Stream extends LazyLogging {
         TWITTER_ACCESS_TOKEN_SECRET=access_token_secret
      */
 
-    val runtime = 3 //minutes
-    val runtimeMS = runtime * 60000 //stores runtime in milliseconds
+    val runtime = 1 //minutes
+    val runtimeMS = runtime * 30000 //stores runtime in milliseconds
     val streamingClient = TwitterStreamingClient()
     val trackedWords = Seq("#covid")
     var tweetCounter = 0
@@ -51,7 +51,7 @@ object Stream extends LazyLogging {
       if (System.currentTimeMillis() - t0 > runtimeMS) {
         val tweetsPerMinute = tweetCounter / runtime
         println(
-          "Twitter Users are tweeting about Covid " + tweetsPerMinute + " per minute on average"
+          "Twitter Users are tweeting about Covid " + tweetsPerMinute + "times per minute on average"
         )
         streamingClient.shutdown()
         pw.close
