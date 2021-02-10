@@ -16,6 +16,7 @@ import com.typesafe.scalalogging.LazyLogging
 object Get extends LazyLogging {
   def main(args: Array[String]): Unit = {
 
+    // Arg0 is the keyword to run the analysis on
     val keyword = args(0)
 
     logger.info("Start of new execution.")

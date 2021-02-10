@@ -260,3 +260,4 @@ fabric.properties
 twitter-batch-get/.scalafmt.conf
 .env
 .scalafmt.conf
+tweetText.txt
